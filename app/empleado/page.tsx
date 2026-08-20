@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import EstadoBadge from "@/components/EstadoBadge";
+import CapturaFoto from "@/components/CapturaFoto";
 import type { Registro, ResumenSemanal, SesionUsuario } from "@/lib/types";
 
 interface DatosRegistros {
@@ -24,6 +25,7 @@ export default function PanelEmpleado() {
   } | null>(null);
   const [horaReloj, setHoraReloj] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [fotoEntrada, setFotoEntrada] = useState<string | null>(null);
 
   const cargarDatos = useCallback(async () => {
     const [resUsuario, resRegistros] = await Promise.all([
@@ -66,13 +68,17 @@ export default function PanelEmpleado() {
       const res = await fetch("/api/registros/marcar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accion }),
+        body: JSON.stringify({
+          accion,
+          ...(accion === "ENTRADA" ? { foto: fotoEntrada } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         setMensaje({ tipo: "error", texto: data.error || "Ocurrio un error." });
       } else {
         setMensaje({ tipo: "exito", texto: "Registro guardado correctamente." });
+        setFotoEntrada(null);
         await cargarDatos();
       }
     } catch {
@@ -174,12 +180,15 @@ export default function PanelEmpleado() {
 
           <div className="mt-6 grid grid-cols-1 gap-3">
             {puedeEntrada && (
-              <BotonAccion
-                label="Registrar entrada"
-                color="brand"
-                disabled={procesando}
-                onClick={() => marcar("ENTRADA")}
-              />
+              <>
+                <CapturaFoto onFotoLista={setFotoEntrada} />
+                <BotonAccion
+                  label="Registrar entrada"
+                  color="brand"
+                  disabled={procesando || !fotoEntrada}
+                  onClick={() => marcar("ENTRADA")}
+                />
+              </>
             )}
 
             {puedeDecidirAlmuerzo && (
@@ -232,23 +241,33 @@ export default function PanelEmpleado() {
             <h2 className="text-sm font-semibold text-ink-900 mb-4">
               Registro de hoy
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-              <Dato label="Entrada" valor={hoy.horaEntrada || "—"} />
-              <Dato
-                label="Almuerzo"
-                valor={
-                  hoy.huboAlmuerzo === "NO"
-                    ? "No aplica"
-                    : hoy.horaInicioAlmuerzo && hoy.horaFinAlmuerzo
-                    ? `${hoy.horaInicioAlmuerzo} - ${hoy.horaFinAlmuerzo}`
-                    : hoy.horaInicioAlmuerzo || "—"
-                }
-              />
-              <Dato label="Salida" valor={hoy.horaSalida || "—"} />
-              <Dato
-                label="Horas"
-                valor={hoy.totalHorasTrabajadas || "—"}
-              />
+            <div className="flex items-start gap-4">
+              {hoy.fotoEntrada && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`data:image/jpeg;base64,${hoy.fotoEntrada}`}
+                  alt="Foto de verificacion de entrada"
+                  className="h-16 w-16 rounded-xl object-cover ring-1 ring-ink-200 flex-shrink-0"
+                />
+              )}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center flex-1">
+                <Dato label="Entrada" valor={hoy.horaEntrada || "—"} />
+                <Dato
+                  label="Almuerzo"
+                  valor={
+                    hoy.huboAlmuerzo === "NO"
+                      ? "No aplica"
+                      : hoy.horaInicioAlmuerzo && hoy.horaFinAlmuerzo
+                      ? `${hoy.horaInicioAlmuerzo} - ${hoy.horaFinAlmuerzo}`
+                      : hoy.horaInicioAlmuerzo || "—"
+                  }
+                />
+                <Dato label="Salida" valor={hoy.horaSalida || "—"} />
+                <Dato
+                  label="Horas"
+                  valor={hoy.totalHorasTrabajadas || "—"}
+                />
+              </div>
             </div>
           </section>
         )}

@@ -33,6 +33,7 @@ const REGISTROS_HEADERS = [
   "FechaCreacion",
   "FechaModificacion",
   "ModificadoPor",
+  "FotoEntrada",
 ];
 
 let cachedClient: sheets_v4.Sheets | null = null;
@@ -107,7 +108,21 @@ async function ensureHeaders(tab: string, headers: string[]): Promise<void> {
   });
 
   const currentHeaders = res.data.values?.[0] ?? [];
+
   if (currentHeaders.length === 0) {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${tab}!A1`,
+      valueInputOption: "RAW",
+      requestBody: { values: [headers] },
+    });
+    return;
+  }
+
+  // Si la hoja ya tenia encabezados pero le faltan columnas nuevas (por una
+  // actualizacion de la aplicacion), se completan al final sin tocar las
+  // columnas existentes ni los datos ya guardados.
+  if (currentHeaders.length < headers.length) {
     await sheets.spreadsheets.values.update({
       spreadsheetId,
       range: `${tab}!A1`,
@@ -199,6 +214,7 @@ function rowToRegistro(row: string[]): Registro {
     fechaCreacion: row[13] ?? "",
     fechaModificacion: row[14] ?? "",
     modificadoPor: row[15] ?? "",
+    fotoEntrada: row[16] ?? "",
   };
 }
 
@@ -220,6 +236,7 @@ function registroToRow(r: Registro): (string | number)[] {
     r.fechaCreacion,
     r.fechaModificacion,
     r.modificadoPor,
+    r.fotoEntrada || "",
   ];
 }
 

@@ -50,6 +50,19 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+      const foto = typeof body?.foto === "string" ? body.foto : "";
+      if (!foto) {
+        return NextResponse.json(
+          { error: "Debes tomarte una foto para registrar tu entrada." },
+          { status: 400 }
+        );
+      }
+      if (foto.length > 60000) {
+        return NextResponse.json(
+          { error: "La foto es demasiado pesada. Intenta tomarla de nuevo." },
+          { status: 400 }
+        );
+      }
       const nuevo: Registro = {
         id: nanoid(10),
         empleadoId: sesion.id,
@@ -67,6 +80,7 @@ export async function POST(request: NextRequest) {
         fechaCreacion: new Date().toISOString(),
         fechaModificacion: new Date().toISOString(),
         modificadoPor: sesion.usuario,
+        fotoEntrada: foto,
       };
       const creado = await crearRegistro(nuevo);
       return NextResponse.json({ ok: true, registro: creado });

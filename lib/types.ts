@@ -38,6 +38,7 @@ export interface Registro {
   fechaCreacion: string;
   fechaModificacion: string;
   modificadoPor: string;
+  fotoEntrada: string; // foto en base64 (JPEG comprimido) tomada al marcar entrada
 }
 
 export type EstadoRegistro =

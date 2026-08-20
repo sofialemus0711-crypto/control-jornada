@@ -18,6 +18,7 @@ interface Resumen {
 export default function AdminResumenPage() {
   const [resumen, setResumen] = useState<Resumen | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [fotoAmpliada, setFotoAmpliada] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/resumen")
@@ -98,6 +99,7 @@ export default function AdminResumenPage() {
             <table className="w-full text-sm min-w-[640px]">
               <thead>
                 <tr className="text-left text-xs text-ink-500 border-b border-ink-100">
+                  <th className="py-2 px-2 font-medium">Foto</th>
                   <th className="py-2 px-2 font-medium">Empleado</th>
                   <th className="py-2 px-2 font-medium">Entrada</th>
                   <th className="py-2 px-2 font-medium">Almuerzo</th>
@@ -109,6 +111,21 @@ export default function AdminResumenPage() {
               <tbody>
                 {resumen.registrosHoy.map((r) => (
                   <tr key={r.id} className="border-b border-ink-100 last:border-0">
+                    <td className="py-2.5 px-2">
+                      {r.fotoEntrada ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={`data:image/jpeg;base64,${r.fotoEntrada}`}
+                          alt={`Foto de entrada de ${r.nombreEmpleado}`}
+                          onClick={() =>
+                            setFotoAmpliada(`data:image/jpeg;base64,${r.fotoEntrada}`)
+                          }
+                          className="h-9 w-9 rounded-lg object-cover ring-1 ring-ink-200 cursor-pointer hover:ring-brand-400 transition"
+                        />
+                      ) : (
+                        <span className="text-ink-300 text-xs">—</span>
+                      )}
+                    </td>
                     <td className="py-2.5 px-2 font-medium text-ink-900">
                       {r.nombreEmpleado}
                     </td>
@@ -138,6 +155,20 @@ export default function AdminResumenPage() {
           </div>
         )}
       </section>
+
+      {fotoAmpliada && (
+        <div
+          className="fixed inset-0 bg-ink-900/70 flex items-center justify-center z-30 p-4"
+          onClick={() => setFotoAmpliada(null)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={fotoAmpliada}
+            alt="Foto de verificacion ampliada"
+            className="max-h-[80vh] max-w-full rounded-2xl shadow-elevated"
+          />
+        </div>
+      )}
     </div>
   );
 }
