@@ -1,0 +1,41 @@
+{
+  "name": "control-jornada-laboral",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplicacion web para el control de jornada laboral de empleados mediante QR, con almacenamiento en Google Sheets.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "setup:sheets": "tsx scripts/setup-sheets.ts",
+    "setup:admin": "tsx scripts/crear-admin.ts"
+  },
+  "dependencies": {
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "googleapis": "144.0.0",
+    "jose": "5.9.6",
+    "bcryptjs": "2.4.3",
+    "qrcode": "1.5.4",
+    "nanoid": "5.0.7",
+    "date-fns": "3.6.0",
+    "date-fns-tz": "3.2.0"
+  },
+  "devDependencies": {
+    "dotenv": "16.4.5",
+    "typescript": "5.6.3",
+    "@types/node": "20.16.11",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.1",
+    "@types/qrcode": "1.5.5",
+    "@types/bcryptjs": "2.4.6",
+    "tailwindcss": "3.4.13",
+    "postcss": "8.4.47",
+    "autoprefixer": "10.4.20",
+    "tsx": "4.19.1",
+    "eslint": "8.57.1",
+    "eslint-config-next": "14.2.15"
+  }
+}
