@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import EstadoBadge from "@/components/EstadoBadge";
 import CapturaFoto from "@/components/CapturaFoto";
-import ResumenMensual from "@/components/ResumenMensual";
+import HistorialMensual from "@/components/HistorialMensual";
 import type { Registro, ResumenSemanal, SesionUsuario } from "@/lib/types";
 import type { ResumenMensual as ResumenMensualTipo } from "@/lib/hours";
 
@@ -307,13 +307,13 @@ export default function PanelEmpleado() {
           </section>
         )}
 
-        {/* Resumen mensual de horas extra */}
-        <ResumenMensual
-          cargarResumen={async (mes) => {
-            const res = await fetch(`/api/registros/mensual?mes=${mes}`);
+        {/* Historial mensual de horas extra (desde el primer registro) */}
+        <HistorialMensual
+          cargarHistorial={async () => {
+            const res = await fetch(`/api/registros/historial-mensual`);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Error");
-            return data.resumenMensual as ResumenMensualTipo;
+            return data.historial as ResumenMensualTipo[];
           }}
         />
 

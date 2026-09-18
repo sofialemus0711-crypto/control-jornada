@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ResumenMensual from "@/components/ResumenMensual";
+import HistorialMensual from "@/components/HistorialMensual";
 import type { EmpleadoPublico } from "@/lib/types";
 import type { ResumenMensual as ResumenMensualTipo } from "@/lib/hours";
 
@@ -55,16 +55,16 @@ export default function AdminMensualPage() {
       </section>
 
       {empleadoId && (
-        <ResumenMensual
+        <HistorialMensual
           key={empleadoId}
           dependencias={[empleadoId]}
-          cargarResumen={async (mes) => {
+          cargarHistorial={async () => {
             const res = await fetch(
-              `/api/admin/registros/mensual?empleadoId=${empleadoId}&mes=${mes}`
+              `/api/admin/registros/historial-mensual?empleadoId=${empleadoId}`
             );
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Error");
-            return data.resumenMensual as ResumenMensualTipo;
+            return data.historial as ResumenMensualTipo[];
           }}
         />
       )}

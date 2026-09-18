@@ -274,3 +274,19 @@ export function calcularResumenMensual(
 export function mesActualISO(): string {
   return fechaActualISO().slice(0, 7);
 }
+
+/**
+ * Arma el resumen mensual de TODOS los meses que tengan al menos una
+ * semana con datos (desde el primer registro hasta el mas reciente),
+ * ordenados del mas reciente al mas antiguo. Asi el historial completo se
+ * arma automaticamente, sin que el usuario tenga que ir mes por mes.
+ */
+export function calcularHistorialMensual(
+  resumenesSemanales: ResumenSemanal[]
+): ResumenMensual[] {
+  const meses = Array.from(
+    new Set(resumenesSemanales.map((r) => r.fechaInicio.slice(0, 7)))
+  ).sort((a, b) => b.localeCompare(a));
+
+  return meses.map((mes) => calcularResumenMensual(resumenesSemanales, mes));
+}
