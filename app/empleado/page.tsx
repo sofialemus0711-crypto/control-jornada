@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import EstadoBadge from "@/components/EstadoBadge";
 import CapturaFoto from "@/components/CapturaFoto";
 import HistorialMensual from "@/components/HistorialMensual";
+import ClasificacionHoras from "@/components/ClasificacionHoras";
+import type { ResultadoClasificacion } from "@/lib/recargos";
 import type { Registro, ResumenSemanal, SesionUsuario } from "@/lib/types";
 import type { ResumenMensual as ResumenMensualTipo } from "@/lib/hours";
 
@@ -314,6 +316,17 @@ export default function PanelEmpleado() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Error");
             return data.historial as ResumenMensualTipo[];
+          }}
+        />
+
+        <ClasificacionHoras
+          cargar={async (desde, hasta) => {
+            const res = await fetch(
+              `/api/registros/clasificacion?desde=${desde}&hasta=${hasta}`
+            );
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Error");
+            return data.resultado as ResultadoClasificacion;
           }}
         />
 

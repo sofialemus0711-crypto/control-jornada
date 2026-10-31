@@ -8,7 +8,7 @@ import type { SesionUsuario } from "@/lib/types";
 const TABS = [
   { href: "/admin", label: "Resumen" },
   { href: "/admin/registros", label: "Registros" },
-  { href: "/admin/mensual", label: "Horas extra" },
+  { href: "/admin/mensual", label: "Horas extra y recargos" },
   { href: "/admin/empleados", label: "Empleados" },
   { href: "/admin/qr", label: "Codigo QR" },
 ];

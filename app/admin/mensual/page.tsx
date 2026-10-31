@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import HistorialMensual from "@/components/HistorialMensual";
+import ClasificacionHoras from "@/components/ClasificacionHoras";
+import type { ResultadoClasificacion } from "@/lib/recargos";
 import type { EmpleadoPublico } from "@/lib/types";
 import type { ResumenMensual as ResumenMensualTipo } from "@/lib/hours";
 
@@ -22,7 +24,7 @@ export default function AdminMensualPage() {
   }, []);
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-2xl">
+    <div className="space-y-6 animate-fade-in max-w-4xl">
       <div>
         <h1 className="text-xl font-bold text-ink-900">
           Horas extra por mes
@@ -65,6 +67,20 @@ export default function AdminMensualPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Error");
             return data.historial as ResumenMensualTipo[];
+          }}
+        />
+      )}
+      {empleadoId && (
+        <ClasificacionHoras
+          key={"cl" + empleadoId}
+          dependencias={[empleadoId]}
+          cargar={async (desde, hasta) => {
+            const res = await fetch(
+              `/api/admin/registros/clasificacion?empleadoId=${empleadoId}&desde=${desde}&hasta=${hasta}`
+            );
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Error");
+            return data.resultado as ResultadoClasificacion;
           }}
         />
       )}
