@@ -241,49 +241,60 @@ export default function ClasificacionHoras({
               </div>
 
               {/* Detalle por dia */}
-              <div className="overflow-x-auto -mx-2">
-                <table className="w-full text-sm min-w-[620px]">
-                  <thead>
-                    <tr className="text-left text-xs text-ink-500 border-b border-ink-100">
-                      <th className="py-2 px-2 font-medium">Fecha</th>
-                      <th className="py-2 px-2 font-medium">Turno</th>
-                      <th className="py-2 px-2 font-medium text-right">Netas</th>
-                      <th className="py-2 px-2 font-medium text-right">Extra</th>
-                      <th className="py-2 px-2 font-medium">Cómo se clasifica</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {resultado.dias.map((d, i) => (
-                      <tr key={d.fecha + i} className="border-b border-ink-100 last:border-0 align-top">
-                        <td className="py-2 px-2 whitespace-nowrap">
-                          {d.diaSemana.slice(0, 3)} {fmtFecha(d.fecha)}
+              <div>
+                <h3 className="text-sm font-semibold text-ink-900 mb-2">
+                  Jornada día por día
+                </h3>
+                <div className="space-y-3">
+                  {resultado.dias.map((d, i) => (
+                    <div
+                      key={d.fecha + i}
+                      className={`rounded-xl border p-3 ${
+                        d.horasExtra > 0 ? "border-amber-200 bg-amber-50/40" : "border-ink-100"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                        <p className="text-sm font-semibold text-ink-900">
+                          {d.diaSemana} {fmtFecha(d.fecha)}
                           {d.festivo && (
-                            <div className="text-[11px] text-red-600">{d.festivo}</div>
+                            <span className="ml-2 text-xs font-medium text-red-600">
+                              {d.festivo === "Domingo" ? "Domingo" : `Festivo: ${d.festivo}`}
+                            </span>
                           )}
-                        </td>
-                        <td className="py-2 px-2 whitespace-nowrap text-ink-500">
-                          {d.horaEntrada}–{d.horaSalida}
-                        </td>
-                        <td className="py-2 px-2 text-right tabular-nums">{d.horasNetas.toFixed(2)}</td>
-                        <td className="py-2 px-2 text-right tabular-nums font-semibold text-amber-700">
-                          {d.horasExtra.toFixed(2)}
-                        </td>
-                        <td className="py-2 px-2 text-xs text-ink-700">
-                          {CATEGORIAS.filter((c) => d.horas[c] > 0).map((c) => (
-                            <div key={c}>
-                              {d.horas[c].toFixed(2)} h · {ETIQUETAS_CATEGORIA[c]}
-                            </div>
-                          ))}
-                          {d.excedeLimiteDiarioLegal && (
-                            <div className="text-red-600 mt-0.5">
-                              ⚠ Más de 2 h extra en el día (tope legal)
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </p>
+                        <p className="text-xs text-ink-500">
+                          Entrada {d.horaEntrada} · Almuerzo {d.almuerzo} · Salida {d.horaSalida}
+                        </p>
+                      </div>
+                      <p className="text-xs text-ink-700 mt-1">
+                        Netas <b>{d.horasNetas.toFixed(2)} h</b> · Ordinarias{" "}
+                        <b>{d.horasOrdinarias.toFixed(2)} h</b> · Extra{" "}
+                        <b className="text-amber-700">{d.horasExtra.toFixed(2)} h</b>
+                      </p>
+                      <ul className="mt-2 space-y-1">
+                        {d.tramos.map((t, k) => (
+                          <li
+                            key={k}
+                            className={`flex justify-between gap-3 text-xs rounded-lg px-2 py-1 ${
+                              t.extra ? "bg-amber-100 text-amber-900 font-medium" : "bg-ink-100 text-ink-700"
+                            }`}
+                          >
+                            <span>
+                              {t.desde}–{t.hasta} · {ETIQUETAS_CATEGORIA[t.categoria]}
+                              {t.extra ? " (EXTRA)" : ""}
+                            </span>
+                            <span className="tabular-nums whitespace-nowrap">{t.horas.toFixed(2)} h</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {d.excedeLimiteDiarioLegal && (
+                        <p className="text-xs text-red-600 mt-1">
+                          ⚠ Más de 2 h extra en el día (tope legal)
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {resultado.semanas.some((s) => s.excedeLimiteSemanalLegal) && (

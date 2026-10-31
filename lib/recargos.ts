@@ -197,12 +197,24 @@ function aMin(hora: string): number | null {
   return h * 60 + mi;
 }
 
+export interface TramoClasificado {
+  desde: string; // HH:mm
+  hasta: string; // HH:mm
+  categoria: CategoriaHora;
+  horas: number;
+  extra: boolean;
+}
+
 export interface DiaClasificado {
   fecha: string;
   diaSemana: string;
   festivo: string | null; // nombre del festivo, "Domingo" o null
   horaEntrada: string;
   horaSalida: string;
+  /** "12:00–13:00" o "Sin almuerzo" */
+  almuerzo: string;
+  /** Tramos continuos de la jornada con su clasificacion, en orden. */
+  tramos: TramoClasificado[];
   horasNetas: number;
   horasOrdinarias: number;
   horasExtra: number;
@@ -295,6 +307,7 @@ export function clasificarRegistro(
   }
 
   const minutos = vacio();
+  const rawTramos: Array<{ desde: number; hasta: number; cat: CategoriaHora }> = [];
   const limiteMin = Math.round(limiteOrdinarioDia * 60);
   let trabajados = 0;
   const cacheDia = new Map<number, { dom: boolean; inicioNoc: number }>();
@@ -332,6 +345,9 @@ export function clasificarRegistro(
           : "ORDINARIA_DIURNA";
       }
       minutos[cat]++;
+      const ult = rawTramos[rawTramos.length - 1];
+      if (ult && ult.cat === cat && ult.hasta === m) ult.hasta = m + 1;
+      else rawTramos.push({ desde: m, hasta: m + 1, cat });
     }
   }
 
@@ -349,9 +365,27 @@ export function clasificarRegistro(
   const festivo = nombreFestivo(r.fecha) ?? (esDomingo(r.fecha) ? "Domingo" : null);
   const extraHoras = redondear(extraMin / 60);
 
+  const hhmm = (m: number) => {
+    const x = m % 1440;
+    return `${String(Math.floor(x / 60)).padStart(2, "0")}:${String(x % 60).padStart(2, "0")}`;
+  };
+  const tramos: TramoClasificado[] = rawTramos.map((t) => ({
+    desde: hhmm(t.desde),
+    hasta: hhmm(t.hasta),
+    categoria: t.cat,
+    horas: redondear((t.hasta - t.desde) / 60),
+    extra: ES_EXTRA[t.cat],
+  }));
+  const almuerzo =
+    segmentos.length === 2
+      ? `${hhmm(segmentos[0][1])}–${hhmm(segmentos[1][0])}`
+      : "Sin almuerzo";
+
   return {
     fecha: r.fecha,
     diaSemana: nombreDiaSemana(r.fecha),
+    almuerzo,
+    tramos,
     festivo,
     horaEntrada: r.horaEntrada,
     horaSalida: r.horaSalida,
