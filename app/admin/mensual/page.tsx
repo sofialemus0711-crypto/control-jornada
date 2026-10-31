@@ -73,6 +73,7 @@ export default function AdminMensualPage() {
       {empleadoId && (
         <ClasificacionHoras
           key={"cl" + empleadoId}
+          empleadoNombre={empleados.find((e) => e.id === empleadoId)?.nombre}
           dependencias={[empleadoId]}
           cargar={async (desde, hasta) => {
             const res = await fetch(

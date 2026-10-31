@@ -320,6 +320,7 @@ export default function PanelEmpleado() {
         />
 
         <ClasificacionHoras
+          empleadoNombre={usuario?.nombre}
           cargar={async (desde, hasta) => {
             const res = await fetch(
               `/api/registros/clasificacion?desde=${desde}&hasta=${hasta}`

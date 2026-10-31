@@ -7,11 +7,14 @@ import {
   ETIQUETAS_CATEGORIA,
   type ResultadoClasificacion,
 } from "@/lib/recargos";
+import { exportarExcel, exportarPDF } from "@/lib/exportarClasificacion";
 
 interface Props {
   cargar: (desde: string, hasta: string) => Promise<ResultadoClasificacion>;
   dependencias?: unknown[];
   titulo?: string;
+  /** Nombre del empleado para el encabezado de los informes. */
+  empleadoNombre?: string;
 }
 
 function iso(d: Date): string {
@@ -36,7 +39,9 @@ export default function ClasificacionHoras({
   cargar,
   dependencias = [],
   titulo = "Horas extra y recargos (ley colombiana)",
+  empleadoNombre = "Empleado",
 }: Props) {
+  const [exportando, setExportando] = useState<null | "pdf" | "xlsx">(null);
   const hoy = new Date();
   const [desde, setDesde] = useState(iso(new Date(hoy.getFullYear(), hoy.getMonth(), 1)));
   const [hasta, setHasta] = useState(iso(hoy));
@@ -83,6 +88,21 @@ export default function ClasificacionHoras({
     setDesde(iso(d));
     setHasta(iso(f));
     buscar(iso(d), iso(f));
+  }
+
+  async function exportar(tipo: "pdf" | "xlsx") {
+    if (!resultado) return;
+    setExportando(tipo);
+    setError(null);
+    try {
+      const sal = Number(salario.replace(/\D/g, "")) || 0;
+      if (tipo === "pdf") await exportarPDF(resultado, empleadoNombre, sal);
+      else await exportarExcel(resultado, empleadoNombre, sal);
+    } catch {
+      setError("No se pudo generar el informe. Intenta de nuevo.");
+    } finally {
+      setExportando(null);
+    }
   }
 
   const valorHora = Number(salario.replace(/\D/g, "")) / 210;
@@ -238,6 +258,27 @@ export default function ClasificacionHoras({
                     Escribe el salario para ver el valor estimado. No se guarda.
                   </p>
                 )}
+              </div>
+
+              {/* Informes */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-ink-700">Descargar informe:</span>
+                <button
+                  type="button"
+                  onClick={() => exportar("pdf")}
+                  disabled={exportando !== null}
+                  className="rounded-xl border border-ink-300 px-3 py-2 text-sm font-medium disabled:opacity-50"
+                >
+                  {exportando === "pdf" ? "Generando..." : "PDF"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => exportar("xlsx")}
+                  disabled={exportando !== null}
+                  className="rounded-xl border border-ink-300 px-3 py-2 text-sm font-medium disabled:opacity-50"
+                >
+                  {exportando === "xlsx" ? "Generando..." : "Excel / Google Sheets"}
+                </button>
               </div>
 
               {/* Detalle por dia */}
